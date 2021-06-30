@@ -144,3 +144,4 @@ dmypy.json
 .history/
 
 .mypy_cache
+README.md.
