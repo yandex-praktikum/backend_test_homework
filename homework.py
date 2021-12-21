@@ -69,9 +69,14 @@ class Running(Training):
         """
         coeff_calorie_1 = 18
         coeff_calorie_2 = 20
-        calories_Running = (coeff_calorie_1 *
-                            self.get_mean_speed() - coeff_calorie_2) * \
-            self.weight / Training.M_IN_KM * self.duration * 60
+        calories_Running = (
+            (coeff_calorie_1
+             * self.get_mean_speed()
+             - coeff_calorie_2)
+             * self.weight
+             / Training.M_IN_KM
+             * (self.duration * 60)
+             )
         return calories_Running
 
 
@@ -92,9 +97,14 @@ class SportsWalking(Training):
         coeff_calorie_4 = 0.029
 
         calories_SportsWalking = ((
-            coeff_calorie_3 * self.weight +
-            (self.get_mean_speed()**2 // self.height) *
-            coeff_calorie_4 * self.weight) * (self.duration * 60))
+            coeff_calorie_3
+            * self.weight
+            + (self.get_mean_speed()**2 
+            // self.height)
+            * coeff_calorie_4
+            * self.weight)
+            * (self.duration * 60)
+            )
         return calories_SportsWalking
 
 
@@ -112,10 +122,11 @@ class Swimming(Training):
         """Формула расчёта средней скорости при плавании:
         длина_бассейна * count_pool / M_IN_KM / время_тренировки.
          """
-        mean_speed_Swimming = (self.length_pool *
-                               self.count_pool /
-                               Training.M_IN_KM /
-                               (self.duration * 60))
+        mean_speed_Swimming = (self.length_pool
+                               * self.count_pool
+                               / Training.M_IN_KM
+                               / (self.duration * 60)
+                               )
         return mean_speed_Swimming
 
     def get_spent_calories(self) -> float:
@@ -150,10 +161,10 @@ def main(training: Training) -> None:
 
 if __name__ == "__main__":
     packages = [
-            ('SWM', [720, 1, 80, 25, 40]),
-            ('RUN', [15000, 1, 75]),
-            ('WLK', [9000, 1, 75, 180]),
-        ]
+        ('SWM', [720, 1, 80, 25, 40]),
+        ('RUN', [15000, 1, 75]),
+        ('WLK', [9000, 1, 75, 180]),
+    ]
     for workout_type, data in packages:
         training = read_package(workout_type, data)
         main(training)
