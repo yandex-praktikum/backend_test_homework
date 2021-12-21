@@ -69,14 +69,13 @@ class Running(Training):
         """
         coeff_calorie_1 = 18
         coeff_calorie_2 = 20
-        calories_Running = (
-            (coeff_calorie_1
-             * self.get_mean_speed()
-             - coeff_calorie_2)
-             * self.weight
-             / Training.M_IN_KM
-             * (self.duration * 60)
-             )
+        calories_Running = ((
+            coeff_calorie_1
+            * self.get_mean_speed()
+            - coeff_calorie_2)
+            * self.weight
+            / Training.M_IN_KM
+            * (self.duration * 60))
         return calories_Running
 
 
@@ -99,12 +98,11 @@ class SportsWalking(Training):
         calories_SportsWalking = ((
             coeff_calorie_3
             * self.weight
-            + (self.get_mean_speed()**2 
+            + (self.get_mean_speed()**2
             // self.height)
             * coeff_calorie_4
             * self.weight)
-            * (self.duration * 60)
-            )
+            * (self.duration * 60))
         return calories_SportsWalking
 
 
