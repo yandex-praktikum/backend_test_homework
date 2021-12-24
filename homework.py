@@ -78,7 +78,7 @@ class Running(Training):
             * (self.duration * 60))
         return calories_Running
 
-
+"""testing"""
 class SportsWalking(Training):
     """Спортивная ходьба"""
 
