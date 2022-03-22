@@ -1,1 +1,3 @@
+# ignore files (complete path is required when ignored file is not located in the root directory. Masks are supported also)
+
 README.md
