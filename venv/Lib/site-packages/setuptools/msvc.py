@@ -24,18 +24,18 @@ from io import open
 from os import listdir, pathsep
 from os.path import join, isfile, isdir, dirname
 import sys
+import contextlib
 import platform
 import itertools
 import subprocess
 import distutils.errors
 from setuptools.extern.packaging.version import LegacyVersion
-
-from setuptools.extern.six.moves import filterfalse
+from setuptools.extern.more_itertools import unique_everseen
 
 from .monkey import get_unpatched
 
 if platform.system() == 'Windows':
-    from setuptools.extern.six.moves import winreg
+    import winreg
     from os import environ
 else:
     # Mock winreg and environ so the module can be imported on this platform.
@@ -194,7 +194,9 @@ def _msvc14_find_vc2017():
             join(root, "Microsoft Visual Studio", "Installer", "vswhere.exe"),
             "-latest",
             "-prerelease",
+            "-requiresAny",
             "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+            "-requires", "Microsoft.VisualStudio.Workload.WDExpress",
             "-property", "installationPath",
             "-products", "*",
         ]).decode(encoding="mbcs", errors="strict").strip()
@@ -277,7 +279,7 @@ def _msvc14_get_vc_env(plat_spec):
     except subprocess.CalledProcessError as exc:
         raise distutils.errors.DistutilsPlatformError(
             "Error executing {}".format(exc.cmd)
-        )
+        ) from exc
 
     env = {
         key.lower(): value
@@ -340,7 +342,7 @@ def _augment_exception(exc, version, arch=''):
 
     if "vcvarsall" in message.lower() or "visual c" in message.lower():
         # Special error message if MSVC++ not installed
-        tmpl = 'Microsoft Visual C++ {version:0.1f} is required.'
+        tmpl = 'Microsoft Visual C++ {version:0.1f} or greater is required.'
         message = tmpl.format(**locals())
         msdownload = 'www.microsoft.com/download/details.aspx?id=%d'
         if version == 9.0:
@@ -360,8 +362,9 @@ def _augment_exception(exc, version, arch=''):
             message += msdownload % 8279
         elif version >= 14.0:
             # For VC++ 14.X Redirect user to latest Visual C++ Build Tools
-            message += (' Get it with "Build Tools for Visual Studio": '
-                        r'https://visualstudio.microsoft.com/downloads/')
+            message += (' Get it with "Microsoft C++ Build Tools": '
+                        r'https://visualstudio.microsoft.com'
+                        r'/visual-cpp-build-tools/')
 
     exc.args = (message, )
 
@@ -643,8 +646,10 @@ class RegistryInfo:
         """
         key_read = winreg.KEY_READ
         openkey = winreg.OpenKey
+        closekey = winreg.CloseKey
         ms = self.microsoft
         for hkey in self.HKEYS:
+            bkey = None
             try:
                 bkey = openkey(hkey, ms(key), 0, key_read)
             except (OSError, IOError):
@@ -659,6 +664,9 @@ class RegistryInfo:
                 return winreg.QueryValueEx(bkey, name)[0]
             except (OSError, IOError):
                 pass
+            finally:
+                if bkey:
+                    closekey(bkey)
 
 
 class SystemInfo:
@@ -720,27 +728,23 @@ class SystemInfo:
         ms = self.ri.microsoft
         vckeys = (self.ri.vc, self.ri.vc_for_python, self.ri.vs)
         vs_vers = []
-        for hkey in self.ri.HKEYS:
-            for key in vckeys:
-                try:
-                    bkey = winreg.OpenKey(hkey, ms(key), 0, winreg.KEY_READ)
-                except (OSError, IOError):
-                    continue
+        for hkey, key in itertools.product(self.ri.HKEYS, vckeys):
+            try:
+                bkey = winreg.OpenKey(hkey, ms(key), 0, winreg.KEY_READ)
+            except (OSError, IOError):
+                continue
+            with bkey:
                 subkeys, values, _ = winreg.QueryInfoKey(bkey)
                 for i in range(values):
-                    try:
+                    with contextlib.suppress(ValueError):
                         ver = float(winreg.EnumValue(bkey, i)[0])
                         if ver not in vs_vers:
                             vs_vers.append(ver)
-                    except ValueError:
-                        pass
                 for i in range(subkeys):
-                    try:
+                    with contextlib.suppress(ValueError):
                         ver = float(winreg.EnumKey(bkey, i))
                         if ver not in vs_vers:
                             vs_vers.append(ver)
-                    except ValueError:
-                        pass
         return sorted(vs_vers)
 
     def find_programdata_vs_vers(self):
@@ -920,8 +924,8 @@ class SystemInfo:
         """
         return self._use_last_dir_name(join(self.WindowsSdkDir, 'lib'))
 
-    @property
-    def WindowsSdkDir(self):
+    @property  # noqa: C901
+    def WindowsSdkDir(self):  # noqa: C901  # is too complex (12)  # FIXME
         """
         Microsoft Windows SDK directory.
 
@@ -1797,29 +1801,5 @@ class EnvironmentInfo:
         if not extant_paths:
             msg = "%s environment variable is empty" % name.upper()
             raise distutils.errors.DistutilsPlatformError(msg)
-        unique_paths = self._unique_everseen(extant_paths)
+        unique_paths = unique_everseen(extant_paths)
         return pathsep.join(unique_paths)
-
-    # from Python docs
-    @staticmethod
-    def _unique_everseen(iterable, key=None):
-        """
-        List unique elements, preserving order.
-        Remember all elements ever seen.
-
-        _unique_everseen('AAAABBBCCDAABBB') --> A B C D
-
-        _unique_everseen('ABBCcAD', str.lower) --> A B C D
-        """
-        seen = set()
-        seen_add = seen.add
-        if key is None:
-            for element in filterfalse(seen.__contains__, iterable):
-                seen_add(element)
-                yield element
-        else:
-            for element in iterable:
-                k = key(element)
-                if k not in seen:
-                    seen_add(k)
-                    yield element
