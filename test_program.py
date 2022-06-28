@@ -18,3 +18,6 @@ def test_program():
             'Исправьте в нем ошибки:\n'
             f'{e}'
         )
+
+if __name__ == '__main__':
+    test_program()
