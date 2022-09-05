@@ -18,3 +18,7 @@ def test_program():
             'Исправьте в нем ошибки:\n'
             f'{e}'
         )
+
+
+def pribavka(a, b):
+    return a + b
