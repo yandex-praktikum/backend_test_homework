@@ -1,0 +1,3 @@
+hello new test file
+
+ok now its perfect
