@@ -1,3 +1,3 @@
-print('Я домашка')
+print('Я дока')
 
 print("HELLO")
