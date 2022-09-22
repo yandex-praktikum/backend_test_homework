@@ -1,5 +1,4 @@
 # backend_test_homework
-nen xnj n jyjdjt
-dfglge
-fgd
-fsk
+ nen xnj n jyjdjt
+
+ Мое новое красивое РИБМИ а не этот ужас
