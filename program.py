@@ -1,4 +1,4 @@
-def sum(x, y):
-    return print(x - y)
+def sum(x, y, z):
+    return print(x - y + z)
 
-sum(5, 3)
+sum(5, 3, 9)
