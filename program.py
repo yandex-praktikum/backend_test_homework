@@ -90,7 +90,7 @@ class SportsWalking(Training):
 
 @dataclass
 class Swimming(Training):
-    """Тренировка: плавание."""
+    """Тренировка: ."""
     length_pool: float
     count_pool: int
     LEN_STEP: InitVar[float] = 1.38
