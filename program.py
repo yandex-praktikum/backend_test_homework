@@ -1,3 +1,6 @@
+import additional_program
+
+
 class Triangle:
 	def __init__(self, a, b, c):
 		self._is_triangle(a, b, c)
@@ -28,3 +31,5 @@ for tup in input_data:
 		lst_tr.append(obj)
 	except:
 		continue
+
+additional_program.main()
