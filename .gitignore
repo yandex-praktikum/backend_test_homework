@@ -6,3 +6,12 @@ build/side.txt
 
 # игнорировать все файлы с расширением .doc
 *.doc 
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
