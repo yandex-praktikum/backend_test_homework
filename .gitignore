@@ -111,9 +111,6 @@ env.bak/
 venv.bak/
 
 
-#test
-t2/
-
 # Spyder project settings
 .spyderproject
 .spyproject
