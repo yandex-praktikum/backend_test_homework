@@ -1,7 +1,7 @@
-import os
+from pathlib import Path
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-dir_files = [filename.lower() for filename in os.listdir(BASE_DIR)]
+BASE_DIR = Path(__file__).resolve().parent
+dir_files = [filename.name.lower() for filename in BASE_DIR.iterdir()]
 
 files_list = ['program.py', 'readme.md']
 
