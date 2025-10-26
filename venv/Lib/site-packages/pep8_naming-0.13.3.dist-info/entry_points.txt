@@ -1,0 +1,2 @@
+[flake8.extension]
+N8 = pep8ext_naming:NamingChecker
